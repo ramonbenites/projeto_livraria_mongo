@@ -1,4 +1,6 @@
 from model.categoria import Categoria
+from database
+
 
 class CategoriaDAO:
 
@@ -13,7 +15,7 @@ class CategoriaDAO:
 
     def remover(self, categoria_id: int) -> bool:
         encontrado = False
-        
+
         for c in self.__categorias:
             if (c.id == categoria_id):
                 index = self.__categorias.index(c)
@@ -29,12 +31,11 @@ class CategoriaDAO:
                 cat = c
                 break
         return cat
-    
+
     def ultimo_id(self) -> int:
-        index = len(self.__categorias) -1
+        index = len(self.__categorias) - 1
         if (index == -1):
             id = 0
         else:
             id = self.__categorias[index].id
         return id
-    
