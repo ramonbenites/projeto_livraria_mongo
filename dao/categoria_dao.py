@@ -1,41 +1,48 @@
 from model.categoria import Categoria
-from database
+from database.client_factory import ClientFactory
+from bson import ObjectId
 
 
 class CategoriaDAO:
 
     def __init__(self):
-        self.__categorias: list[Categoria] = list()
+        self.__client: ClientFactory = ClientFactory()
 
     def listar(self) -> list[Categoria]:
-        return self.__categorias
+        categorias = list()
+
+        client = self.__client.get_client()
+        db = client.livraria
+        for documento in db.categorias.find():
+            cat = Categoria(documento['nome'])
+            cat.id = documento['_id']
+            categorias.append(cat)
+        client.close()
+
+        return categorias
 
     def adicionar(self, categoria: Categoria) -> None:
-        self.__categorias.append(categoria)
+        client = self.__client.get_client()
+        db = client.livraria
+        db.categorias.insert_one({'nome': categoria.nome})
+        client.close()
 
-    def remover(self, categoria_id: int) -> bool:
-        encontrado = False
+    def remover(self, categoria_id: ObjectId) -> bool:
+        client = self.__client.get_client()
+        db = client.livraria
+        resultado = db.categorias.delete_one({'_id': categoria_id})
+        client.close()
+        if (resultado.deleted_count == 1):
+            return True
+        return False
 
-        for c in self.__categorias:
-            if (c.id == categoria_id):
-                index = self.__categorias.index(c)
-                self.__categorias.pop(index)
-                encontrado = True
-                break
-        return encontrado
-
-    def buscar_por_id(self, categoria_id) -> Categoria:
+    def buscar_por_id(self, categoria_id: ObjectId) -> Categoria:
         cat = None
-        for c in self.__categorias:
-            if (c.id == categoria_id):
-                cat = c
-                break
+        client = self.__client.get_client()
+        db = client.livraria
+        resultado = db.categorias.find_one({'_id': categoria_id})
+        client.close()
+        if (resultado):
+            cat = Categoria(resultado['nome'])
+            cat.id = resultado['_id']
         return cat
-
-    def ultimo_id(self) -> int:
-        index = len(self.__categorias) - 1
-        if (index == -1):
-            id = 0
-        else:
-            id = self.__categorias[index].id
-        return id

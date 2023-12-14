@@ -1,39 +1,49 @@
 from model.editora import Editora
+from database.client_factory import ClientFactory
+from bson import ObjectId
+
 
 class EditoraDAO:
 
     def __init__(self):
-        self.__editoras: list[Editora] = list()
+        self.__client: ClientFactory = ClientFactory()
 
     def listar(self) -> list[Editora]:
-        return self.__editoras
+        editoras = list()
+
+        client = self.__client.get_client()
+        db = client.livraria
+        for documento in db.editoras.find():
+            edt = Editora(
+                documento['nome'], documento['endereco'], documento['telefone'])
+            edt.id = documento['_id']
+            editoras.append(edt)
+        client.close()
+
+        return editoras
 
     def adicionar(self, editora: Editora) -> None:
-        self.__editoras.append(editora)
+        client = self.__client.get_client()
+        db = client.livraria
+        db.editoras.insert_one(
+            {'nome': editora.nome, 'endereco': editora.endereco, 'telefone': editora.telefone})
+        client.close()
 
-    def remover(self, editora_id: int) -> bool:
-        encontrado = False
-        for e in self.__editoras:
-            if (e.id == editora_id):
-                index = self.__editoras.index(e)
-                self.__editoras.pop(index)
-                encontrado = True
-                break
-        return encontrado
+    def remover(self, editora_id: ObjectId) -> bool:
+        client = self.__client.get_client()
+        db = client.livraria
+        resultado = db.editoras.delete_one({'_id': editora_id})
+        if (resultado.deleted_count == 1):
+            return True
+        return False
 
-    def buscar_por_id(self, editora_id) -> Editora:
+    def buscar_por_id(self, editora_id: ObjectId) -> Editora:
         edt = None
-        for e in self.__editoras:
-            if (e.id == editora_id):
-                edt = e
-                break
+        client = self.__client.get_client()
+        db = client.livraria
+        resultado = db.editoras.find_one({'_id': editora_id})
+        if (resultado):
+            edt = Editora(
+                resultado['nome'], resultado['endereco'], resultado['telefone'])
+            edt.id = resultado['_id']
         return edt
-    
-    def ultimo_id(self) -> int:
-        index = len(self.__editoras) -1
-        if (index == -1):
-            id = 0
-        else:
-            id = self.__editoras[index].id
-        return id
-    

@@ -1,15 +1,18 @@
+from bson import ObjectId
+
+
 class Categoria:
 
-    def __init__(self, id: int, nome: str):
-        self.__id: int = id
+    def __init__(self, nome: str):
+        self.__id: ObjectId = None
         self.__nome: str = nome
 
     @property
-    def id(self) -> int:
+    def id(self) -> ObjectId:
         return self.__id
-    
+
     @id.setter
-    def id(self, id: int):
+    def id(self, id: ObjectId):
         self.__id = id
 
     @property
@@ -19,7 +22,3 @@ class Categoria:
     @nome.setter
     def nome(self, nome: str):
         self.__nome = nome
-
-    @staticmethod
-    def depositar():
-        return "Opa"

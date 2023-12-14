@@ -1,18 +1,21 @@
+from bson import ObjectId
+
+
 class Autor:
 
-    def __init__(self, id: int, nome: str, email: str, telefone: str, bio: str):
-        self.__id: int = id
+    def __init__(self, nome: str, email: str, telefone: str, bio: str):
+        self.__id: ObjectId = None
         self.__nome: str = nome
         self.__email: str = email
         self.__telefone: str = telefone
         self.__bio: str = bio
 
     @property
-    def id(self) -> int:
+    def id(self) -> ObjectId:
         return self.__id
-    
+
     @id.setter
-    def id(self, id: int):
+    def id(self, id: ObjectId):
         self.__id = id
 
     @property
